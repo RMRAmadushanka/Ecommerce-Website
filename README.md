@@ -1,2 +1,2 @@
 # Ecommerce-Website
-Fully ecommerce website using MERN stack
+Full ecommerce website using MERN stack
