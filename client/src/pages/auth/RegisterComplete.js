@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import app from "../../firebase";
+import { auth } from "../../firebase";
 import {
   getAuth,
   getIdTokenResult,
@@ -19,8 +19,14 @@ const RegisterComplete = ({ history }) => {
   const navigate = useNavigate();
   const handleSubmit = async (e) => {
     e.preventDefault();
-    // Confirm the link is a sign-in with email link.
-    const auth = getAuth();
+    if (!email || !password) {
+      toast.error("Email and password is required");
+      return;
+    }
+    if (password.length < 6) {
+      toast.error("Password must be at least 6 characters long");
+      return;
+    }
     if (isSignInWithEmailLink(auth, window.location.href)) {
       // Additional state parameters can also be passed via URL.
       // This can be used to continue the user's intended action before triggering
@@ -38,16 +44,15 @@ const RegisterComplete = ({ history }) => {
         .then((result) => {
           if (result.user.emailVerified) {
             // Clear email from storage.
-            window.localStorage.removeItem("emailForSignIn");
-
-            const idTokenResult = result.user.getIdTokenResult();
-            // You can access the new user via result.user
-            // Additional user info profile not available via:
-            // result.additionalUserInfo.profile == null
-            // You can check if the user is new or existing:
-            // result.additionalUserInfo.isNewUser
-            console.log(idTokenResult);
-            navigate("/");
+    
+            const user = auth.currentUser;
+            updatePassword(user, password).then(() => {
+              // Update successful.
+              window.localStorage.removeItem('emailForSignIn');
+              navigate("/");
+            }).catch((error) => {
+            console.log(error);
+            });
           }
         })
         .catch((error) => {

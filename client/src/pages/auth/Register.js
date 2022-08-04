@@ -1,20 +1,26 @@
-import React, { useState } from "react";
-import app from "../../firebase";
+import React, { useState,useEffect } from "react";
+import {auth} from '../../firebase'
 import { getAuth, sendSignInLinkToEmail } from "firebase/auth";
-import { toast } from "react-toastify";
-
+import { toast,ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import { useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
 const Register = () => {
   const [email, setEmail] = useState("");
-
+  const {user} = useSelector((state)=>({...state}))
+const navigate = useNavigate()
+  useEffect(()=>{
+      if(user&& user.token) navigate('/')
+  },[user])
   const handleSubmit = async (e) => {
-    e.preventDefault();
+    e.preventDefault()
 
     const config = {
       url: process.env.REACT_APP_REGISTER_REDIRECT_URL,
       handleCodeInApp: true,
     };
 
-    const auth = getAuth();
+
     await sendSignInLinkToEmail(auth, email, config)
       .then(() => {
         // The link was successfully sent. Inform the user.
@@ -53,7 +59,7 @@ const Register = () => {
       <div className="row">
         <div className="col-md-6 offset-md-3">
           <h4>Register</h4>
-
+          <ToastContainer />
           {registerForm()}
         </div>
       </div>

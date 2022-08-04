@@ -6,8 +6,29 @@ import Header from "./components/nav/Header";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import RegisterComplete from "./pages/auth/RegisterComplete";
-
+import ForgotPassword from "./pages/auth/ForgotPassword";
+import { useDispatch } from "react-redux";
+import { useEffect } from "react";
+import { auth } from "./firebase";
 const App = () => {
+  const dispatch = useDispatch()
+
+  useEffect(()=>{
+    const unsubscribe = auth.onAuthStateChanged(async(user)=>{
+      if(user){
+        const idTokenResult = await user.getIdTokenResult()
+        console.log(user);
+        dispatch({
+          type:'LOGGED_IN_USER',
+          payload:{
+            email:user.email,
+            token:idTokenResult.token
+          }
+        })
+      }
+    })
+    return ()=>unsubscribe()
+  },[])
   return (
     <Router>
       <Header />
@@ -17,6 +38,7 @@ const App = () => {
         <Route exact path="/login" element={<Login />} />
         <Route exact path="/register" element={<Register />} />
         <Route exact path="/register/complete" element={<RegisterComplete />} />
+        <Route exact path="/forgot/password" element={<ForgotPassword />} />
       </Routes>
     </Router>
   );
