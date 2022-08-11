@@ -8,11 +8,20 @@ import {
   updatePassword,
 } from "firebase/auth";
 import { toast } from "react-toastify";
+import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
+import axios from 'axios'
+import { createOrUpdateUser } from "../../publicFucntions/auth";
+
+
+
+
 const RegisterComplete = ({ history }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
+  const {user} = useSelector((state)=>({...state}))
+  let dispatch = useDispatch()
   useEffect(() => {
     setEmail(window.localStorage.getItem("emailForSignIn"));
   }, []);
@@ -39,16 +48,32 @@ const RegisterComplete = ({ history }) => {
         // attacks, ask the user to provide the associated email again. For example:
         email = window.prompt("Please provide your email for confirmation");
       }
+      
       // The client SDK will parse the code from the link for you.
-      signInWithEmailLink(auth, email, window.location.href, password)
+       signInWithEmailLink (auth, email, window.location.href, password)
         .then((result) => {
+          
           if (result.user.emailVerified) {
             // Clear email from storage.
     
             const user = auth.currentUser;
-            updatePassword(user, password).then(() => {
+             updatePassword (user, password).then(async() => {
               // Update successful.
               window.localStorage.removeItem('emailForSignIn');
+              const idTokenResult = await user.getIdTokenResult()
+              createOrUpdateUser(idTokenResult.token)
+     .then(res=>
+       dispatch({
+         type:'LOGGED_IN_USER',
+         payload:{
+           name:res.data.name,
+           email:res.data.email,
+           token:idTokenResult.token,
+           role:res.data.role,
+           _id:res.data.id
+         }
+       }))
+     .catch()
               navigate("/");
             }).catch((error) => {
             console.log(error);

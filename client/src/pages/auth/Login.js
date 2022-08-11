@@ -7,6 +7,12 @@ import "react-toastify/dist/ReactToastify.css";
 import {  signInWithEmailAndPassword } from "firebase/auth";
 import { Link, useNavigate } from "react-router-dom";
 import { async } from "@firebase/util";
+import axios from 'axios'
+import { createOrUpdateUser } from "../../publicFucntions/auth";
+
+
+
+
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -47,13 +53,20 @@ setLoading(true)
      const result = await signInWithEmailAndPassword(auth,email,password)
      const {user} = result
      const idTokenResult = await user.getIdTokenResult()
-     dispatch({
-          type:'LOGGED_IN_USER',
-          payload:{
-            email:user.email,
-            token:idTokenResult.token
-          }
-        })
+    
+     createOrUpdateUser(idTokenResult.token)
+     .then(res=>
+       dispatch({
+         type:'LOGGED_IN_USER',
+         payload:{
+           name:res.data.name,
+           email:res.data.email,
+           token:idTokenResult.token,
+           role:res.data.role,
+           _id:res.data.id
+         }
+       }))
+     .catch()
         navigate('/')
    
     } catch (error) {
@@ -73,13 +86,21 @@ setLoading(true)
     .then(async(result)=>{
       const{user} = result
       const idTokenResult = await user.getIdTokenResult()
-      dispatch({
-        type:'LOGGED_IN_USER',
-        payload:{
-          email:user.email,
-          token:idTokenResult.token
-        }
-      })
+      createOrUpdateUser(idTokenResult.token)
+      .then(res=>
+        dispatch({
+          type:'LOGGED_IN_USER',
+          payload:{
+            name:res.data.name,
+            email:res.data.email,
+            token:idTokenResult.token,
+            role:res.data.role,
+            _id:res.data.id
+          }
+        }))
+      .catch()
+
+
       navigate('/')
     })
     .catch(error=>{

@@ -3,7 +3,7 @@ import {auth} from '../../firebase'
 import { getAuth, sendSignInLinkToEmail } from "firebase/auth";
 import { toast,ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 const Register = () => {
   const [email, setEmail] = useState("");
