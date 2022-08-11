@@ -17,13 +17,22 @@ const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
-  const navigate = useNavigate();
+  var navigate = useNavigate();
   const {user} = useSelector((state)=>({...state}))
 
   useEffect(()=>{
       if(user&& user.token) navigate('/')
   },[user])
   let dispatch = useDispatch()
+  
+const rolebaseRedirect = (res) =>{
+
+  if(res.data.role === 'admin'){
+    navigate('/admin/dashboard')
+  }else{
+    navigate('/user/history')
+  }
+}
   const handleSubmit = async (e) => {
     e.preventDefault();
 setLoading(true)
@@ -55,7 +64,7 @@ setLoading(true)
      const idTokenResult = await user.getIdTokenResult()
     
      createOrUpdateUser(idTokenResult.token)
-     .then(res=>
+     .then((res)=>{
        dispatch({
          type:'LOGGED_IN_USER',
          payload:{
@@ -65,9 +74,11 @@ setLoading(true)
            role:res.data.role,
            _id:res.data.id
          }
-       }))
-     .catch()
-        navigate('/')
+       })
+       rolebaseRedirect(res)
+      })
+     .catch(err=>console.log(err))
+        
    
     } catch (error) {
       console.log(error);
@@ -87,7 +98,7 @@ setLoading(true)
       const{user} = result
       const idTokenResult = await user.getIdTokenResult()
       createOrUpdateUser(idTokenResult.token)
-      .then(res=>
+      .then(res=>{
         dispatch({
           type:'LOGGED_IN_USER',
           payload:{
@@ -97,11 +108,13 @@ setLoading(true)
             role:res.data.role,
             _id:res.data.id
           }
-        }))
+        })
+        rolebaseRedirect(res)
+      })
       .catch()
 
 
-      navigate('/')
+      
     })
     .catch(error=>{
       console.log(error);

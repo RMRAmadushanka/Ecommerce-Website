@@ -73,7 +73,7 @@ const RegisterComplete = ({ history }) => {
            _id:res.data.id
          }
        }))
-     .catch()
+     .catch(err=>console.log(err))
               navigate("/");
             }).catch((error) => {
             console.log(error);
